@@ -296,3 +296,41 @@ if st.button("Generate KMeans Clustering Diagrams"):
             ax3.set_xlim(ax2.get_xlim())
             ax3.set_ylim(ax2.get_ylim())
             st.pyplot(f3)
+
+st.divider()
+
+#X 9. Data Cleaning (Extreme Outliers)
+st.subheader("9. Data Cleaning (Handling Extreme Values)")
+st.write("Using the mathematical Interquartile Range (IQR) limits to actively detect and cleanly cap extreme statistical anomalies (outliers) hiding inside the dataset:")
+
+if st.button("Detect & Clean Extreme Values"):
+    with st.spinner("Calculating Interquartile Bounds..."):
+        
+        # Calculate IQR strictly for the 'Popularity' column
+        Q1 = filtered_df['Popularity'].quantile(0.25)
+        Q3 = filtered_df['Popularity'].quantile(0.75)
+        IQR_value = Q3 - Q1
+        
+        lower_bound = Q1 - 1.5 * IQR_value
+        upper_bound = Q3 + 1.5 * IQR_value
+        
+        # 1. Identify raw outliers mathematically exceeding the 1.5 mathematical limits
+        outliers = filtered_df[(filtered_df['Popularity'] < lower_bound) | (filtered_df['Popularity'] > upper_bound)]
+        
+        st.write(f"**Step 1. Detection:** My algorithm definitively identified **{len(outliers)} extreme outliers** in the song `Popularity` metric that fell significantly outside normal bounds!")
+        st.dataframe(outliers)
+        
+        st.write("**Step 2. Data Capping (Winsorization):** We mathematically compress those extreme outliers tightly back into the mathematical limits to clean the predictive model!")
+        
+        # 2. Clean the dataset strictly by capping the upper/lower extreme values
+        cleaned_df = filtered_df.copy()
+        
+        cleaned_df.loc[cleaned_df['Popularity'] > upper_bound, 'Popularity'] = upper_bound
+        cleaned_df.loc[cleaned_df['Popularity'] < lower_bound, 'Popularity'] = lower_bound
+        
+        # Verify cleaning completely eliminated the outliers
+        new_outliers = cleaned_df[(cleaned_df['Popularity'] < lower_bound) | (cleaned_df['Popularity'] > upper_bound)]
+        
+        # Output the Success metrics
+        st.success(f"**Success!** The dataset has been rigorously cleansed. There are now {len(new_outliers)} extreme values remaining.")
+        st.dataframe(cleaned_df.describe())
