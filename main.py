@@ -371,5 +371,3 @@ if st.button("Run One-Hot Encoding"):
         
         # Show exactly how the dataset was transformed natively in Streamlit
         st.dataframe(encoded_df[['Artist', 'Track'] + origin_cols].head(10))
-        
-        st.success("Successfully encoded categorical string data into mathematical binary values! This dataset is now officially 100% standardized for Neural Network processing.")
