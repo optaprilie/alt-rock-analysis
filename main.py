@@ -144,32 +144,26 @@ st.divider()
 st.subheader("4. Statistical Processing & Aggregation")
 st.write("Using Pandas `.groupby()` to calculate the **sum** and **mean** of `Danceability` for each artist's tracks:")
 
-# Group by Artist; compute statistics for each group, keeping it purely in Streamlit's display!
-df_agg = filtered_df.groupby(['Artist']).agg({'Danceability': [sum, "mean"], # sum and mean of danceability per group
-                                              'Tempo': "mean",               # mean of tempo
-                                              'Track': 'count'})             # count of tracks for each group
+
+df_agg = filtered_df.groupby(['Artist']).agg({'Danceability': [sum, "mean"], 
+                                              'Tempo': "mean",               
+                                              'Track': 'count'})             
 
 st.dataframe(df_agg)
 
-# Generate a visually distinct red Matplotlib button specific to this aggregated data
 if st.button("Show Aggregated Data Graph"):
     with st.spinner("Rendering Matplotlib chart..."):
-        # Plotting the Average Tempo per Artist from the aggregated table
         artist_names = df_agg.index
         avg_tempo = df_agg[('Tempo', 'mean')]
         
-        # Create a Matplotlib figure
         fig3, ax3 = matplotlib.pyplot.subplots(figsize=(14, 6))
         
         import matplotlib.colors as mcolors
         
-        # Generate a list of all distinct named colors natively from matplotlib (inspired by your code!)
         all_colors = list(mcolors.cnames.keys())
         
-        # Plot a beautiful multi-colored bar chart pulling from the exact length required
         ax3.bar(artist_names, avg_tempo, color=all_colors[:len(artist_names)], edgecolor="black")
         
-        # Format the axes and labels
         ax3.set_xticks(range(len(artist_names)))
         ax3.set_xticklabels(artist_names, rotation=90, fontsize=9)
         ax3.set_xlabel("Artist", fontsize=12, fontweight='bold')
@@ -177,7 +171,6 @@ if st.button("Show Aggregated Data Graph"):
         ax3.set_title("Average Track Tempo per Artist", fontsize=16)
         ax3.grid(axis='y', linestyle='--', alpha=0.7)
         
-        # Render the specific Matplotlib chart
         st.pyplot(fig3)
 
 st.write("---")
@@ -185,24 +178,18 @@ st.write("**Correlation Analysis: Danceability, Tempo, and Popularity**")
 
 if st.button("Show Correlation Matrix"):
     with st.spinner("Calculating Pearson correlations..."):
-        # Select the 3 specific numeric columns
         corr_data = filtered_df[['Danceability', 'Tempo', 'Popularity']].dropna()
         
-        # Calculate the standard pearson correlation matrix
         corr_matrix = corr_data.corr()
         
         st.write("Raw Mathematical Matrix (Color Coded):")
-        # Streamlit natively renders pandas gradients beautifully
         st.dataframe(corr_matrix.style.background_gradient(cmap='coolwarm', vmin=-1, vmax=1).format("{:.3f}"))
         
-        # Create a highly professional Matplotlib Heatmap representation
         fig_corr, ax_corr = matplotlib.pyplot.subplots(figsize=(6, 5))
         
-        # Plotting the heatmap squares
         cax = ax_corr.matshow(corr_matrix, cmap='coolwarm', vmin=-1, vmax=1)
         fig_corr.colorbar(cax, shrink=0.8)
         
-        # Formatting the axes labels
         labels = ['Danceability', 'Tempo', 'Popularity']
         ax_corr.set_xticks(range(len(labels)))
         ax_corr.set_yticks(range(len(labels)))
@@ -210,11 +197,9 @@ if st.button("Show Correlation Matrix"):
         ax_corr.set_yticklabels(labels, fontsize=10, fontweight='bold')
         ax_corr.xaxis.set_ticks_position('bottom')
         
-        # Annotate the heatmap squares with the exact numeric values
         for i in range(len(labels)):
             for j in range(len(labels)):
                 val = corr_matrix.iloc[i, j]
-                # If dark colormap, use white text, else black
                 text_color = "white" if abs(val) > 0.5 else "black"
                 ax_corr.text(j, i, f"{val:.2f}",
                              ha="center", va="center", color=text_color, fontweight='bold', fontsize=12)
@@ -231,7 +216,6 @@ st.divider()
 st.subheader("5. Processing Datasets with Merge / Join")
 st.write("We create a secondary standalone dataset containing the 'Country of Origin' for each artist, and use Pandas `pd.merge()` to mathematically join them:")
 
-# Create a small, secondary complementary dataset
 country_mapping = pd.DataFrame({
     'Artist': selected_bands,
     'Country': [
@@ -246,36 +230,25 @@ country_mapping = pd.DataFrame({
     ]
 })
 
-# Display the secondary mini-dataset
-st.write("Here is the secondary 'Country Mapping' dataset we created:")
 st.dataframe(country_mapping)
 
-# Execute the Merge (Left Join) combining our 800 tracks with the country mapping
-st.write("Here is the final dataset after we apply `pd.merge(filtered_df, country_mapping, on='Artist', how='left')`:")
 merged_df = pd.merge(filtered_df, country_mapping, on='Artist', how='left')
 
-# Output the result
 st.dataframe(merged_df)
 
-# Create a Pie Chart based on the exact syntax logic from the User's inspired code example!
 st.write("Visualizing the Distribution of Tracks by Country of Origin using a Pie Chart:")
 
 if st.button("Show Country Pie Chart"):
     with st.spinner("Generating pie chart..."):
-        # We group by 'Country' and calculate the size (track count) of each region dynamically
         country_distribution = merged_df.groupby('Country')['Track'].count()
 
-        # Create the matplotlib figure using their exact figsize parameters
         fig4, ax4 = matplotlib.pyplot.subplots(figsize=(8, 8))
         
         if not country_distribution.empty:
-            # Replicating the exact logic: pie(data, labels=..., autopct='%1.1f%%', startangle=90)
             ax4.pie(country_distribution, labels=country_distribution.index, autopct='%1.1f%%', startangle=90)
             
             ax4.set_title('Track Distribution by Country of Origin', fontsize=16, fontweight='bold')
-            ax4.axis('equal') # Equal aspect ratio ensures that pie is drawn as a flawless circle.
-            
-            # Show the plot
+            ax4.axis('equal') 
             st.pyplot(fig4)
 
 st.divider()
@@ -283,16 +256,6 @@ st.divider()
 #X 6. Matplotlib Graphical Representation
 st.subheader("6. Graphical Representation (`matplotlib`)")
 st.write("Using the full `matplotlib` package to create a bar chart of the top 10 most popular tracks:")
-
-# Injecting HTML/CSS to force the button's background to be exactly #FF0000
-st.markdown("""
-<style>
-div.stButton > button {
-    background-color: #FF0000 !important;
-    color: white !important;
-    border-color: #CC0000 !important;
-}
-</style>""", unsafe_allow_html=True)
 
 if st.button("Show Matplotlib Chart"):
     with st.spinner("Rendering bar chart..."):
