@@ -8,10 +8,9 @@ import geopandas as gpd
 from sklearn.cluster import KMeans
 import statsmodels.api as sm
 
-
 st.set_page_config(page_title="Classic Alt Rock Analysis", layout="wide")
 
-st.title("Classic Alt Rock Dataset Analysis")
+st.title("Classic Alt Rock Dataset analysis")
 st.write("Streamlit interface for dataset analysis.")
 
 @st.cache_data
@@ -25,26 +24,33 @@ with st.spinner("Loading dataset..."):
     df = load_data()
 
 st.subheader("1. Raw Dataset Preview")
-st.dataframe(df.head(1000))
+st.dataframe(df.head(800))
 
 st.subheader("Dataset Dimensions")
 st.write(f"This dataset has {df.shape[0]} rows and {df.shape[1]} columns.")
 
-#X 2. Extracted Artists
 st.subheader("2. Extracted Artists")
-# Extract a unique list of all artists in the dataset
-artists_list = df['Artist'].unique().tolist()
-artists_list = [str(artist) for artist in artists_list]
-artists_list.sort(key=str.lower)
+
+# Let the user choose how to sort
+sort_option = st.radio("Sort Artists By:", ["Alphabetical (A-Z)", "Average Popularity (High to Low)"], horizontal=True)
+
+if sort_option == "Average Popularity (High to Low)":
+    # Calculate each artist's average popularity and sort them descending
+    artist_pop = df.groupby('Artist')['Popularity'].mean().sort_values(ascending=False)
+    artists_list = artist_pop.index.tolist()
+    artists_list = [str(artist) for artist in artists_list]
+else:
+    # Default alphabetical sorting
+    artists_list = df['Artist'].unique().tolist()
+    artists_list = [str(artist) for artist in artists_list]
+    artists_list.sort(key=str.lower)
 
 st.write(f"There are a total of {len(artists_list)} unique artists present in the initial database:")
 
-# We will use Streamlit's built-in column layout to display the artists cleanly without any table headers!
 num_cols = 5
 cols = st.columns(num_cols)
 
 for i, artist in enumerate(artists_list):
-    # This automatically distributes the artist names left-to-right into the 5 columns
     cols[i % num_cols].write(f"- {artist}")
 
 st.divider()
@@ -371,5 +377,3 @@ if st.button("Run One-Hot Encoding"):
         
         # Show exactly how the dataset was transformed natively in Streamlit
         st.dataframe(encoded_df[['Artist', 'Track'] + origin_cols].head(10))
-        
-        st.success("Successfully encoded categorical string data into mathematical binary values! This dataset is now officially 100% standardized for Neural Network processing.")
