@@ -356,11 +356,22 @@ st.write("Encoding track lengths into categorical 'Formats' and visualizing popu
 
 if st.button("Run Format Analysis"):
     with st.spinner("Processing encoding and sorting by Year..."):
-        # Select only the single longest track from each of the 40 bands
-        adv_df = merged_df.sort_values(['Artist', 'Duration'], ascending=[True, False]).groupby('Artist').head(1)
+        # Select exactly 30 tracks for the analysis
+        # 1. The 10 shortest tracks in the collection
+        shortest_10 = merged_df.sort_values('Duration').head(10)
+        # 2. The 10 longest tracks in the collection
+        longest_10 = merged_df.sort_values('Duration', ascending=False).head(10)
+        # 3. The 10 tracks closest to the median duration (The Middle)
+        sorted_all = merged_df.sort_values('Duration')
+        mid_idx = len(sorted_all) // 2
+        middle_10 = sorted_all.iloc[mid_idx-5 : mid_idx+5]
+
+        # Combine these into a single representative 30-track dataframe
+        adv_df = pd.concat([shortest_10, longest_10, middle_10]).drop_duplicates()
         adv_df = adv_df.dropna(subset=['Duration', 'Popularity', 'Year']).sort_values('Year')
 
         adv_df['Duration_Mins'] = adv_df['Duration'] / 60000
+
         bins = [0, 3.5, 6, np.inf]
         labels = ['Radio Edit', 'Album Cut', 'Extended Mix']
         adv_df['Format'] = pd.cut(adv_df['Duration_Mins'], bins=bins, labels=labels)
