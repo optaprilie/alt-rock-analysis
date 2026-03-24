@@ -273,11 +273,20 @@ if st.button("Extract Geographic Boundaries"):
         # Plot the entire world faintly in the background
         world.plot(ax=ax5, color='#e9ecef', edgecolor='white')
         
-        # Plot our 3 specific Alt-Rock country polygons dynamically in bright #FF0000 Red
-        alt_rock_countries.plot(ax=ax5, color='#FF0000', edgecolor='black')
+        # Plot each target country with requested colors and labels
+        world[world['name'] == 'USA'].plot(ax=ax5, color='red', edgecolor='black')
+        world[world['name'] == 'UK'].plot(ax=ax5, color='blue', edgecolor='black')
+        world[world['name'] == 'Ireland'].plot(ax=ax5, color='green', edgecolor='black')
         
-        ax5.set_title("Literal Geometry Arrays for Selected Countries", fontsize=14, fontweight='bold')
+        ax5.set_title("Geographic Origins of Classic Alt-Rock Artists", fontsize=14, fontweight='bold')
         ax5.axis("off")
+
+        # Create a custom legend for the map
+        import matplotlib.patches as mpatches
+        usa_patch = mpatches.Patch(color='red', label='USA')
+        uk_patch = mpatches.Patch(color='blue', label='UK')
+        ireland_patch = mpatches.Patch(color='green', label='Ireland')
+        ax5.legend(handles=[usa_patch, uk_patch, ireland_patch], loc='lower left', title="Artist Origins")
         
         st.pyplot(fig5)
 
