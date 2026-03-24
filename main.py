@@ -389,6 +389,25 @@ if st.button("Run Format Analysis"):
         ax_final.set_title("Historical Popularity Trends by Encoded Track Format")
         ax_final.legend()
         st.pyplot(fig_final)
-        st.info("**Final Context:** This encoding exercise proves how track format and length influences consumer demand across history.")
+
+        # 4. Final Economic Interpretation: Attention Efficiency (ROI)
+        st.write("---")
+        st.subheader("Economic Interpretation: Efficiency of Attention")
+        st.write("From a record label's perspective, time is money. We calculate the **Return on Investment (ROI)** as Popularity captured per minute of music:")
+
+        # Calculate Popularity per 1 minute of listener attention for our 30 tracks
+        adv_df['Pop_ROI'] = adv_df['Popularity'] / adv_df.Duration_Mins
+        roi_stats = adv_df.groupby('Format', observed=True)['Pop_ROI'].mean()
+
+        col_a, col_b, col_c = st.columns(3)
+        with col_a:
+            st.metric("Radio Edit ROI", f"{roi_stats['Radio Edit']:.2f}", "Pop/Minute")
+        with col_b:
+            st.metric("Album Cut ROI", f"{roi_stats['Album Cut']:.2f}", "Pop/Minute")
+        with col_c:
+            st.metric("Extended Mix ROI", f"{roi_stats['Extended Mix']:.2f}", "Pop/Minute")
+
+        st.info("💡 **Statistical Takeaway:** Shorter 'Radio Edit' products almost always capture a higher concentration of popularity per minute. This proves the **Attention Scarcity Theory**: in a digital market, the most efficient financial strategy is producing shorter content that maximizes consumer interest in the smallest possible 'time-window'.")
+
 
 
