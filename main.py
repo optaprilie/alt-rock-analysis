@@ -97,10 +97,14 @@ st.write("**March 2026 Estimated Artist Revenue Comparison**")
 if st.button("Show Revenue Chart"):
     with st.spinner("Generating revenue chart..."):
         fig_rev, ax_rev = matplotlib.pyplot.subplots(figsize=(8, 5))
-        
         # Data
         bands = ['Red Hot Chili Peppers', 'Sex Pistols']
-        revenues = [230000, 6250]
+        
+        # Calculated from March 2026 actual stream volumes multiplied by an estimated $0.005 per stream
+        rhcp_revenue = 45844488 * 0.005
+        pistols_revenue = 1258867 * 0.005
+        revenues = [rhcp_revenue, pistols_revenue]
+        
         bar_colors = ['red', 'black']
         
         # Plot
@@ -108,12 +112,12 @@ if st.button("Show Revenue Chart"):
         
         # Formatting
         ax_rev.set_ylabel("Revenue ($)", fontweight='bold')
-        ax_rev.set_title("March 2026 Revenue: RHCP vs Sex Pistols", fontsize=14, fontweight='bold')
+        ax_rev.set_title("March 2026 Estimated Spotify Revenue", fontsize=14, fontweight='bold')
         ax_rev.grid(axis='y', linestyle='--', alpha=0.7)
         
-        # Add value labels on top of the bars so they are perfectly readable
+        # Add value labels on top of the bars with 2-decimal currency formatting
         for i, v in enumerate(revenues):
-            ax_rev.text(i, v + 3000, f"${v:,}", ha='center', fontweight='bold', fontsize=11)
+            ax_rev.text(i, v + 5000, f"${v:,.2f}", ha='center', fontweight='bold', fontsize=11)
             
         st.pyplot(fig_rev)
 
