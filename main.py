@@ -375,9 +375,4 @@ if st.button("Run One-Hot Encoding"):
         # Dynamically discover whatever dummy variables were generated
         origin_cols = [col for col in encoded_df.columns if col.startswith('Origin_')]
         
-        # Show exactly how the dataset was transformed natively in Streamlit
-<<<<<<< HEAD
         st.dataframe(encoded_df[['Artist', 'Track'] + origin_cols].head(10))
-=======
-        st.dataframe(encoded_df[['Artist', 'Track'] + origin_cols].head(10))
->>>>>>> 001d206435957c0800d15f2ff015b90d97c04a39
