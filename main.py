@@ -314,62 +314,8 @@ if st.button("Show Matplotlib Chart"):
 
 st.divider()
 
-
-
-#X 7. Machine Learning: KMeans Clustering
-st.subheader("7. Machine Learning: KMeans Clustering")
-st.write("Using `sklearn.cluster.KMeans` to group our Classic Alt-Rock tracks into 3 distinct mathematical clusters based on their `Danceability` and `Energy` levels:")
-
-if st.button("Generate KMeans Clustering Diagrams"):
-    with st.spinner("Running KMeans algorithm..."):
-
-        # 1. Prepare the Data array 'X' just like the example
-        # We will extract 2 numerical features from our filtered dataset to cluster!
-        cluster_data = filtered_df[['Danceability', 'Energy']].dropna()
-        X = cluster_data.values
-
-        # 2. Initialize and fit the KMeans algorithm (from the provided example!)
-        kmeans = KMeans(n_clusters=3, n_init=5, random_state=42)
-        kmeans.fit(X)
-
-        # 3. Print the Centers and Labels (to Streamlit instead of terminal print())
-        st.write("**Calculated Cluster Centers:**")
-        st.dataframe(pd.DataFrame(kmeans.cluster_centers_, columns=['Danceability Center', 'Energy Center']))
-        
-        # 4. Generate the 3 beautiful scatter plots based strictly on the user's example format
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.write("**1. Raw Data Scatter (`f1`)**")
-            f1, ax1 = matplotlib.pyplot.subplots(figsize=(5,5))
-            ax1.scatter(X[:,0], X[:,1], color='gray', alpha=0.6)
-            ax1.set_xlabel("Danceability", fontsize=10)
-            ax1.set_ylabel("Energy", fontsize=10)
-            st.pyplot(f1)
-            
-        with col2:
-            st.write("**2. Clustered Data (`f2`)**")
-            f2, ax2 = matplotlib.pyplot.subplots(figsize=(5,5))
-            ax2.scatter(X[:,0], X[:,1], c=kmeans.labels_, cmap='rainbow', alpha=0.6)
-            ax2.set_xlabel("Danceability", fontsize=10)
-            ax2.set_ylabel("Energy", fontsize=10)
-            st.pyplot(f2)
-            
-        with col3:
-            st.write("**3. Isolated Cluster Centers (`f3`)**")
-            f3, ax3 = matplotlib.pyplot.subplots(figsize=(5,5))
-            ax3.scatter(kmeans.cluster_centers_[:,0], kmeans.cluster_centers_[:,1], color='black', s=150, marker='X')
-            ax3.set_xlabel("Danceability Center", fontsize=10)
-            ax3.set_ylabel("Energy Center", fontsize=10)
-            ax3.set_xlim(ax2.get_xlim())
-            ax3.set_ylim(ax2.get_ylim())
-            st.pyplot(f3)
-
-st.divider()
-
-#X 8. Statistical Modeling: Multiple Regression (`statsmodels`)
-st.subheader("8. Statistical Modeling: Multiple Regression (`statsmodels`)")
+#X 7. Statistical Modeling: Multiple Regression (`statsmodels`)
+st.subheader("7. Statistical Modeling: Multiple Regression (`statsmodels`)")
 st.write("Using the mathematical `statsmodels.api` package to analyze how significantly `Danceability` and `Energy` statistically predict a track's ultimate `Popularity` on Spotify:")
 
 if st.button("Run Multiple Regression Analysis"):
@@ -415,72 +361,31 @@ if st.button("Run Multiple Regression Analysis"):
 
 st.divider()
 
-#X 9. Data Preprocessing: Encoding Methods
-st.subheader("9. Data Preprocessing: Encoding Methods")
-st.write("Using Pandas `pd.get_dummies()` to uniquely perform **One-Hot Encoding** on the categorical `Country` column, mathematically translating descriptive geographic strings into Machine Learning binary integers (`0` and `1`):")
-
-if st.button("Run One-Hot Encoding"):
-    with st.spinner("Encoding categorical string data into strict numeric arrays..."):
-        
-        # Display the target column before encoding so the professor sees the transformation clearly
-        st.write("**1. Before Encoding (Raw String Categories):**")
-        st.dataframe(merged_df[['Artist', 'Track', 'Country']].head(10))
-        
-        # Apply pd.get_dummies() specifically mapping the categorical 'Country' text into binary variables
-        encoded_df = pd.get_dummies(merged_df, columns=['Country'], prefix='Origin', dtype=int)
-        
-        # Display the mathematically translated result dynamically
-        st.write("**2. After Encoding (Machine Learning Boolean Format):**")
-        st.write("Notice how the single `Country` text column has been mathematically split into three independent boolean arrays so equations can physically read it!")
-        
-        # Dynamically discover whatever dummy variables were generated
-        origin_cols = [col for col in encoded_df.columns if col.startswith('Origin_')]
-        
-        st.dataframe(encoded_df[['Artist', 'Track'] + origin_cols].head(10))
-
-st.divider()
-
-#X 10. Advanced Encoding: Track Length & Popularity Trends
-st.subheader("10. Advanced Encoding: Track Length & Popularity Trends")
+#X 8. Advanced Encoding: Track Length & Popularity Trends
+st.subheader("8. Advanced Encoding: Track Length & Popularity Trends")
 st.write("Encoding track lengths into categorical 'Formats' and visualizing popularity trends sorted by Year.")
 
 if st.button("Run Format Analysis"):
     with st.spinner("Processing encoding and sorting by Year..."):
-        # 1. Cleaning and sorting by Year
         adv_df = merged_df.dropna(subset=['Duration', 'Popularity', 'Year']).sort_values('Year')
         adv_df['Duration_Mins'] = adv_df['Duration'] / 60000
-
-        # 2. Encoding track length into 3 categories (Product Segmentation)
-        # We categorize duration: <3.5 mins (Radio), 3.5-6 mins (Album), >6 mins (Extended)
         bins = [0, 3.5, 6, np.inf]
         labels = ['Radio Edit', 'Album Cut', 'Extended Mix']
         adv_df['Format'] = pd.cut(adv_df['Duration_Mins'], bins=bins, labels=labels)
-
-        # Apply One-Hot Encoding to these new format categories
         format_encoded = pd.get_dummies(adv_df['Format'], prefix='Type', dtype=int)
         adv_df = pd.concat([adv_df, format_encoded], axis=1)
-
         st.write("### The One-Hot Encoded Dataset (Sorted by Year)")
-        st.write("Categorizing track durations into 3 groups and then using `pd.get_dummies()` to create binary statistical indicators:")
         st.dataframe(adv_df[['Year', 'Artist', 'Track', 'Duration_Mins', 'Type_Radio Edit', 'Type_Album Cut', 'Type_Extended Mix', 'Popularity']].head(15))
-
-        # 3. Graphical Representation: Popularity by Format over Time
         yearly_pop = adv_df.groupby(['Year', 'Format'], observed=True)['Popularity'].mean().unstack()
-
         fig_final, ax_final = matplotlib.pyplot.subplots(figsize=(12, 6))
-        
-        # Plotting the three encoded types to see their market performance over the decades
         for format_type in yearly_pop.columns:
             data = yearly_pop[format_type].dropna()
             ax_final.plot(data.index, data.values, marker='o', markersize=4, label=format_type, alpha=0.8)
-
-        ax_final.set_xlabel("Release Year (Ascending Order)", fontweight='bold')
-        ax_final.set_ylabel("Average Spotify Popularity", fontweight='bold')
-        ax_final.set_title("Historical Popularity Trends by Encoded Track Format", fontsize=15, fontweight='bold')
-        ax_final.grid(True, linestyle='--', alpha=0.5)
-        ax_final.legend(title="Encoded Formats")
-        
+        ax_final.set_xlabel("Release Year")
+        ax_final.set_ylabel("Average Popularity")
+        ax_final.set_title("Historical Popularity Trends by Encoded Track Format")
+        ax_final.legend()
         st.pyplot(fig_final)
+        st.info("💡 **Final Context:** This encoding exercise proves how track format and length influences consumer demand across history.")
 
-        st.info("💡 **Statistical Interpretation:** This encoding shows that while 'Extended Mixes' once dominated the prog-rock charts, the market has shifted toward shorter 'Radio Edits' for consistent modern-day popularity results.")
 

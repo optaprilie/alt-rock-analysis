@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import kagglehub as kh
 import os
+from sklearn.cluster import KMeans
 
 # Initialize Streamlit page configuration
 st.set_page_config(page_title="Economic Interpretations", layout="wide")
@@ -27,7 +28,7 @@ st.divider()
 # ==========================================
 # EXERCISE 1: Attention Economy
 # ==========================================
-st.subheader("Economic Exercise 1: The Attention Economy")
+st.subheader("Economic Exercise 10: The Attention Economy")
 st.write("Does the market reward shorter songs under the streaming payout model?")
 
 if st.button("Analyze Duration vs. Attention (Popularity)"):
@@ -111,3 +112,72 @@ if st.button("Calculate Hedonic Market Valuations"):
     st.pyplot(fig_econ3)
     
     st.warning("💡 **Economic Interpretation:** Green bars show features the market currently demands and rewards (Positive ROI). Red bars show features that actively destroy market value. A record label using this data would force their artists to maximize the top green attributes.")
+
+st.divider()
+
+# ==========================================
+# EXERCISE 11: Market Segmentation & Encoding
+# ==========================================
+st.subheader("Economic Exercise 11: Market Segmentation & Encoding")
+st.write("Encoding track lengths into product categories to predict market demand and popularity over time.")
+
+if st.button("Run Encode & Sort Analysis"):
+    with st.spinner("Processing encoding and sorting..."):
+        sorted_df = df.dropna(subset=['Duration', 'Popularity', 'Year']).sort_values('Year')
+        sorted_df['Duration_Mins'] = sorted_df['Duration'] / 60000
+        bins = [0, 3.5, 6, np.inf]
+        labels = ['Radio Edit', 'Album Cut', 'Extended Mix']
+        sorted_df['Format'] = pd.cut(sorted_df['Duration_Mins'], bins=bins, labels=labels)
+        encoded_formats = pd.get_dummies(sorted_df['Format'], prefix='Format').astype(int)
+        sorted_df = pd.concat([sorted_df, encoded_formats], axis=1)
+        st.write("Notice the binary (0 and 1) columns created by the encoding method:")
+        st.dataframe(sorted_df[['Year', 'Track', 'Duration_Mins', 'Format_Radio Edit', 'Format_Album Cut', 'Format_Extended Mix', 'Popularity']].head(15))
+        yearly_trends = sorted_df.groupby(['Year', 'Format'])['Popularity'].mean().unstack()
+        fig_econ11, ax_econ11 = plt.subplots(figsize=(12, 6))
+        for col in yearly_trends.columns:
+            trend = yearly_trends[col].dropna()
+            ax_econ11.plot(trend.index, trend.values, marker='o', markersize=4, label=col, alpha=0.8)
+        ax_econ11.set_xlabel("Release Year")
+        ax_econ11.set_ylabel("Average Popularity")
+        ax_econ11.legend()
+        st.pyplot(fig_econ11)
+        st.info("💡 **Economic Interpretation:** One-Hot Encoding helps us track how the market demand for different length formats has evolved.")
+
+st.divider()
+
+# ==========================================
+# EXERCISE 12: Machine Learning Clustering
+# ==========================================
+st.subheader("Economic Exercise 12: Machine Learning Clustering")
+st.write("Using KMeans to group tracks by audio characteristics (Danceability & Energy).")
+
+if st.button("Run KMeans Clustering"):
+    X = df[['Danceability', 'Energy']].dropna().values
+    kmeans = KMeans(n_clusters=3, n_init=5, random_state=42).fit(X)
+    
+    fig_ml, ax_ml = plt.subplots(figsize=(8, 6))
+    scatter = ax_ml.scatter(X[:,0], X[:,1], c=kmeans.labels_, cmap='viridis', alpha=0.6)
+    ax_ml.set_xlabel("Danceability")
+    ax_ml.set_ylabel("Energy")
+    ax_ml.set_title("KMeans Clustering of Musical Products")
+    st.pyplot(fig_ml)
+
+st.divider()
+
+# ==========================================
+# EXERCISE 13: Geographical Encoding
+# ==========================================
+st.subheader("Economic Exercise 13: Geographical Encoding")
+st.write("How can we translate geographic regions into numbers for a computer?")
+
+if st.button("Run Geo-Encoding Analysis"):
+    # Target subset for demonstration
+    sample_artists = ['Nirvana', 'Oasis', 'The Cure', 'U2']
+    sample_df = df[df['Artist'].isin(sample_artists)].copy()
+    mapping = {'Nirvana': 'USA', 'Oasis': 'UK', 'The Cure': 'UK', 'U2': 'Ireland'}
+    sample_df['Country'] = sample_df['Artist'].map(mapping)
+    encoded = pd.get_dummies(sample_df, columns=['Country'], prefix='Origin', dtype=int)
+    st.write("Results of the One-Hot Encoding transformation:")
+    cols_to_show = [c for c in encoded.columns if 'Origin_' in c]
+    st.dataframe(encoded[['Artist', 'Track'] + cols_to_show].head(10))
+
